@@ -48,6 +48,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
+import android.view.WindowManager;
+import android.view.Display;
 import android.os.SystemProperties;
 
 import com.android.internal.app.ThemeUtils;
@@ -62,6 +64,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+
+import static android.provider.Settings.System.SWAP_VOLUME_KEYS_ORIENTATION;
 
 /**
  * The implementation of the volume manager service.
@@ -198,6 +202,9 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_MUSIC,  // STREAM_TTS
         AudioSystem.STREAM_MUSIC  // STREAM_FM
     };
+
+    static Display mDisplay = null;
+    static int mSwapOrientation = -1;
 
     private final static String SETTING_LAST_HEADSET_MEDIA_VOL = "android.media.AudioService.LAST_HEADSET_MEDIA_VOL";
     private final static String SETTING_LAST_SPEAKER_MEDIA_VOL = "android.media.AudioService.LAST_SPEAKER_MEDIA_VOL";
@@ -364,6 +371,10 @@ public class AudioService extends IAudioService.Stub {
         if (context.getResources().getBoolean(com.android.internal.R.bool.config_fmSeparateVolumeControl)) {
             STREAM_VOLUME_ALIAS[AudioSystem.STREAM_FM] = AudioSystem.STREAM_FM;
         }
+        mDisplay = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        mSwapOrientation = Settings.System.getInt(mContext.getContentResolver(),
+            SWAP_VOLUME_KEYS_ORIENTATION,
+            mContext.getResources().getInteger(com.android.internal.R.integer.swap_volume_keys_orientation));
     }
 
     private void createAudioSystemThread() {
@@ -486,6 +497,12 @@ public class AudioService extends IAudioService.Stub {
         if (streamType == AudioManager.STREAM_FM && !mFmActive) {
             Log.d(TAG, "Got request to adjust inactive FM stream, ignoring.");
             return;
+        }
+        if (mDisplay != null) {
+            int currentOrientation = mDisplay.getRotation();
+            if (currentOrientation == mSwapOrientation) {
+                direction = -direction;
+            }
         }
 
         VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
@@ -972,6 +989,10 @@ public class AudioService extends IAudioService.Stub {
                 setStreamVolumeIndex(streamType, streamState.mIndex);
             }
         }
+
+        mSwapOrientation = Settings.System.getInt(mContext.getContentResolver(),
+            SWAP_VOLUME_KEYS_ORIENTATION,
+            mContext.getResources().getInteger(com.android.internal.R.integer.swap_volume_keys_orientation));	
 
         // apply new ringer mode
         setRingerModeInt(getRingerMode(), false);
