@@ -561,8 +561,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case Skank:
                 resSecNorm = R.drawable.jog_ring_skank_secback_normal;
-                resRingGreen = R.drawable.jog_ring_skank_ring;
-                resRingHighlight = R.drawable.jog_ring_skank_ring_pressed;
+                resRingGreen = R.drawable.jog_ring_skank_ring_green;
+                resRingHighlight = R.drawable.jog_ring_skank_ring_pressed_red;
                 resUnlock = R.drawable.ic_jog_dial_unlock;
                 resCustom = R.drawable.ic_jog_dial_custom;
                 resTarget = R.drawable.jog_tab_target_green;
