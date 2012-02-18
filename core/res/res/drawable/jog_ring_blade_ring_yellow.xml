@@ -17,12 +17,12 @@
 <!-- StateListDrawable used for buttons in the in-call onscreen touch UI. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true"
-        android:drawable="@drawable/jog_ring_skank_ring_pressed_red" />
+        android:drawable="@drawable/jog_ring_blade_ring_pressed_yellow" />
 
     <item android:state_enabled="true"
-        android:drawable="@drawable/jog_ring_skank_ring_normal" />
+        android:drawable="@drawable/jog_ring_blade_ring_normal" />
 
     <item android:state_active="true"
-        android:drawable="@drawable/jog_ring_skank_ring_pressed_red" />
+        android:drawable="@drawable/jog_ring_blade_ring_pressed_yellow" />
 
 </selector>
