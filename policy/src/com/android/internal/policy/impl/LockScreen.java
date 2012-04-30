@@ -847,6 +847,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         return mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
     }
 
+    private boolean isAirplaneModeOn() {
+      return (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON, 0) == 1);
+    }
+
     private void updateRightTabResources() {
         boolean vibe = mSilentMode
             && (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
@@ -1268,6 +1273,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 && simState == IccCard.State.ABSENT);
         if (missingAndNotProvisioned) {
             return Status.SimMissingLocked;
+        }
+
+        boolean presentButNotAvailable = isAirplaneModeOn();
+        if (presentButNotAvailable) {
+            return Status.Normal;
         }
 
         switch (simState) {

@@ -1295,6 +1295,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private void handleNotifyScreenOff() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOff");
+            mHandler.removeMessages(TIMEOUT);
             mKeyguardViewManager.onScreenTurnedOff();
         }
     }
@@ -1306,6 +1307,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private void handleNotifyScreenOn() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenOn");
+            Message msg = mHandler.obtainMessage(TIMEOUT, mWakelockSequence, 0);
+            mHandler.removeMessages(TIMEOUT);
+            mHandler.sendMessageDelayed(msg, AWAKE_INTERVAL_DEFAULT_KEYBOARD_OPEN_MS);
             mKeyguardViewManager.onScreenTurnedOn();
         }
     }
