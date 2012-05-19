@@ -2295,10 +2295,10 @@ public final class Settings {
         public static final String CUSTOM_CARRIER_TEXT = "custom_carrier_text";
 
         /**
-        * Custom Carrier text on the status bar
+        * Custom Carrier text on the Notification drawer
         * @hide
         */
-        public static final String MODIFY_CARRIER_TEXT = "status_bar_carrier_text";
+        public static final String MODIFY_CARRIER_TEXT = "notification_drawer_carrier_text";
 
         /**
          * Whether to use a separate delay for "slide to unlock" and security
