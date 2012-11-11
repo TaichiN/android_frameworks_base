@@ -3941,7 +3941,4 @@
 
   <!-- Stylus gestures -->
   <java-symbol type="bool" name="config_stylusGestures" />
-
-  <!-- Volume key cursor control -->
-  <java-symbol type="bool" name="config_volumeKeyCursorCtrl" />
 </resources>

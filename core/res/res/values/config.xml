@@ -973,7 +973,4 @@
 
     <!-- Boolean to enable Stylus gestures -->
     <bool name="config_stylusGestures">false</bool>
-
-    <!-- Boolean to enable Volume key cursor control -->
-    <bool name="config_volumeKeyCursorCtrl">true</bool>
 </resources>
