@@ -973,4 +973,7 @@
 
     <!-- Boolean to enable Stylus gestures -->
     <bool name="config_stylusGestures">false</bool>
+
+    <!-- Bluetooth support. Some devices does not have bluetooth chip. -->
+    <bool name="config_deviceHasBluetooth">true</bool>
 </resources>

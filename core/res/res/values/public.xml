@@ -3941,4 +3941,7 @@
 
   <!-- Stylus gestures -->
   <java-symbol type="bool" name="config_stylusGestures" />
+
+  <!-- Bluetooth support -->
+  <java-symbol type="bool" name="config_deviceHasBluetooth" />
 </resources>
