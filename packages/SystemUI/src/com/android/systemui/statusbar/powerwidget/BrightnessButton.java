@@ -75,8 +75,8 @@ public class BrightnessButton extends PowerButton {
     @Override
     protected void setupButton(View view) {
         super.setupButton(view);
-        if (view != null) {
-            Context context = view.getContext();
+        if (mView != null) {
+            Context context = mView.getContext();
             mAutoBrightnessSupported = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_automatic_brightness_available);
             if (!mAutoBrightnessSupported) {

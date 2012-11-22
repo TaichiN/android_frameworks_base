@@ -62,8 +62,8 @@ public class SoundButton extends PowerButton {
     @Override
     protected void setupButton(View view) {
         super.setupButton(view);
-        if (view != null) {
-            Context context = view.getContext();
+        if (mView != null) {
+            Context context = mView.getContext();
             mVibratorSupported = isVibratorAvailable(context);
             if (!mVibratorSupported) {
                 mRingersIndex = 1;
