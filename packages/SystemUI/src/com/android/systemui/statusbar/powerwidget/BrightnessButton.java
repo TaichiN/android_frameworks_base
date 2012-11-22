@@ -38,7 +38,7 @@ public class BrightnessButton extends PowerButton {
     private static final int HIGH_BACKLIGHT = (int) (MAX_BACKLIGHT * 0.75f);
 
     // Defaults for now. MIN_BACKLIGHT will be replaced later
-    private static final int[] BACKLIGHTS = new int[] {
+    private static int[] BACKLIGHTS = new int[] {
             AUTO_BACKLIGHT, MIN_BACKLIGHT, LOW_BACKLIGHT, MID_BACKLIGHT, HIGH_BACKLIGHT,
             MAX_BACKLIGHT
     };
@@ -75,10 +75,16 @@ public class BrightnessButton extends PowerButton {
     @Override
     protected void setupButton(View view) {
         super.setupButton(view);
-        if (mView != null) {
-            Context context = mView.getContext();
+        if (view != null) {
+            Context context = view.getContext();
             mAutoBrightnessSupported = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_automatic_brightness_available);
+            if (!mAutoBrightnessSupported) {
+                BACKLIGHTS = new int[] {
+                          MIN_BACKLIGHT, LOW_BACKLIGHT, MID_BACKLIGHT, HIGH_BACKLIGHT,
+                          MAX_BACKLIGHT
+                };
+            }
             updateSettings(context.getContentResolver());
         }
     }
@@ -168,9 +174,14 @@ public class BrightnessButton extends PowerButton {
         String[] modes = parseStoredValue(Settings.System.getString(
                 resolver, Settings.System.EXPANDED_BRIGHTNESS_MODE));
         if (modes == null || modes.length == 0) {
-            mBacklightValues = new int[] {
-                    0, 1, 2, 3, 4, 5
-            };
+            if (mAutoBrightnessSupported) {
+                mBacklightValues = new int[] {
+                        0, 1, 2, 3, 4, 5
+                };
+            } else
+                mBacklightValues = new int[] {
+                        0, 1, 2, 3, 4
+                };
         } else {
             mBacklightValues = new int[modes.length];
             for (int i = 0; i < modes.length; i++) {
