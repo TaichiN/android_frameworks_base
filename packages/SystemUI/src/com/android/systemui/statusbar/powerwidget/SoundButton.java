@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.view.View;
 
@@ -40,7 +41,7 @@ public class SoundButton extends PowerButton {
             AudioManager.RINGER_MODE_NORMAL, false);
     private final Ringer mSoundVibrateRinger = new Ringer(true, AudioManager.VIBRATE_SETTING_ON,
             AudioManager.RINGER_MODE_NORMAL, true);
-    private final Ringer[] mRingers = new Ringer[] {
+    private Ringer[] mRingers = new Ringer[] {
             mSilentRinger, mVibrateRinger, mSoundRinger, mSoundVibrateRinger
     };
     private int mRingersIndex = 2;
@@ -49,6 +50,8 @@ public class SoundButton extends PowerButton {
             0, 1, 2, 3
     };
     private int mRingerValuesIndex = 2;
+
+    private boolean mVibratorSupported = false;
 
     private AudioManager mAudioManager;
 
@@ -59,8 +62,16 @@ public class SoundButton extends PowerButton {
     @Override
     protected void setupButton(View view) {
         super.setupButton(view);
-        if (mView != null) {
-            Context context = mView.getContext();
+        if (view != null) {
+            Context context = view.getContext();
+            mVibratorSupported = isVibratorAvailable(context);
+            if (!mVibratorSupported) {
+                mRingersIndex = 1;
+                mRingerValuesIndex = 1;
+                mRingers = new Ringer[] {
+                    mSilentRinger, mSoundRinger
+                };
+            }
             updateSettings(context.getContentResolver());
         }
     }
@@ -68,7 +79,12 @@ public class SoundButton extends PowerButton {
     @Override
     protected void updateState(Context context) {
         findCurrentState(context);
-        switch (mRingersIndex) {
+        int rindex;
+        if (mVibratorSupported || mRingersIndex == 0) {
+            rindex = mRingersIndex;
+        } else
+            rindex = 2;
+        switch (rindex) {
             case 0:
                 mIcon = R.drawable.stat_silent;
                 mState = STATE_DISABLED;
@@ -136,9 +152,14 @@ public class SoundButton extends PowerButton {
         String[] modes = parseStoredValue(Settings.System.getString(
                 resolver, Settings.System.EXPANDED_RING_MODE));
         if (modes == null || modes.length == 0) {
-            mRingerValues = new int[] {
-                    0, 1, 2, 3
-            };
+            if (mVibratorSupported) {
+                mRingerValues = new int[] {
+                        0, 1, 2, 3
+                };
+            } else
+                mRingerValues = new int[] {
+                        0, 1
+                };
         } else {
             mRingerValues = new int[modes.length];
             for (int i = 0; i < modes.length; i++) {
@@ -232,4 +253,11 @@ public class SoundButton extends PowerButton {
 
     }
 
+    public boolean isVibratorAvailable(Context con) {
+        Vibrator vibrator = (Vibrator) con.getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator == null || !vibrator.hasVibrator()) {
+            return false;
+        }
+        return true;
+    }
 }
