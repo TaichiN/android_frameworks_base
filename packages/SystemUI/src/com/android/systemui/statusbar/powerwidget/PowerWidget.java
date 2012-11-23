@@ -179,6 +179,10 @@ public class PowerWidget extends FrameLayout {
             if (WimaxHelper.isWimaxSupported(mContext)) {
                 buttons += BUTTON_DELIMITER + PowerButton.BUTTON_WIMAX;
             }
+            // Add the Brightness button if bluetooth is not supported
+            if (!mContext.getResources().getBoolean(com.android.internal.R.bool.config_deviceHasBluetooth)) {
+                buttons += BUTTON_DELIMITER + PowerButton.BUTTON_BRIGHTNESS;
+            }
         }
         Log.i(TAG, "Button list: " + buttons);
 
