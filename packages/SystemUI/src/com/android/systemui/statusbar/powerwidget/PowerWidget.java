@@ -189,6 +189,10 @@ public class PowerWidget extends FrameLayout {
                 Log.e(TAG, "Error setting up button: " + button);
             }
         }
+        // Remove the Bluetooth button if it's not supported
+        if (!mContext.getResources().getBoolean(com.android.internal.R.bool.config_deviceHasBluetooth)) {
+            unloadButton(PowerButton.BUTTON_BLUETOOTH);
+        }
         recreateButtonLayout();
         updateHapticFeedbackSetting();
 
