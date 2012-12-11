@@ -87,6 +87,8 @@ public class StatusBarPolicy {
 
     private static final int BATTERY_STYLE_NORMAL    = 0;
     private static final int BATTERY_STYLE_PERCENT   = 1;
+    private static final int BATTERY_STYLE_CIRCLE    = 3;
+    private static final int BATTERY_STYLE_CIRCLE_PERCENT = 4;
     private static final int BATTERY_STYLE_GONE      = 2;
 
     private static final int INET_CONDITION_THRESHOLD = 50;
@@ -638,6 +640,7 @@ public class StatusBarPolicy {
 
             resolver.registerContentObserver(Settings.System
                     .getUriFor(Settings.System.STATUS_BAR_ALARM), false, this);
+            onChange(true);
         }
 
         @Override public void onChange(boolean selfChange) {
@@ -823,6 +826,10 @@ public class StatusBarPolicy {
         if(mStatusBarBattery == BATTERY_STYLE_NORMAL) {
                 mService.setIconVisibility("battery", true);
         } else if (mStatusBarBattery == BATTERY_STYLE_PERCENT) {
+                mService.setIconVisibility("battery", false);
+        } else if (mStatusBarBattery == BATTERY_STYLE_CIRCLE) {
+                mService.setIconVisibility("battery", false);
+        } else if (mStatusBarBattery == BATTERY_STYLE_CIRCLE_PERCENT) {
                 mService.setIconVisibility("battery", false);
         } else if (mStatusBarBattery == BATTERY_STYLE_GONE) {
                 mService.setIconVisibility("battery", false);
@@ -1677,7 +1684,7 @@ public class StatusBarPolicy {
 
         if (mStatusBarBattery == BATTERY_STYLE_NORMAL) {
                 mService.setIconVisibility("battery", true);
-        } else if (mStatusBarBattery == BATTERY_STYLE_PERCENT || mStatusBarBattery == BATTERY_STYLE_GONE) {
+        } else if (mStatusBarBattery == BATTERY_STYLE_PERCENT || mStatusBarBattery == BATTERY_STYLE_CIRCLE || mStatusBarBattery == BATTERY_STYLE_CIRCLE_PERCENT || mStatusBarBattery == BATTERY_STYLE_GONE) {
                 mService.setIconVisibility("battery", false);
         }
 

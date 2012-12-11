@@ -75,12 +75,24 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"/>
 
+        <com.android.systemui.statusbar.CmBatteryCircle
+            android:id="@+id/CmBatteryCircle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.StatusBar.Battery"
+            android:singleLine="true"
+            android:paddingRight="2dip"
+            android:layout_marginTop="2dip"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"/>
+
         <com.android.systemui.statusbar.Clock
             android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:singleLine="true"
             android:paddingRight="6dip"
+            android:paddingLeft="3dip"
             android:gravity="center_vertical|left"
             />
 

@@ -97,5 +97,7 @@
     <color name="keyguard_text_color_soundon">#e69310</color>
     <color name="keyguard_text_color_decline">#fe0a5a</color>
 
+    <!-- Circle battery -->
+    <color name="cyan_dark">#ff00cccc</color>
 </resources>
 
