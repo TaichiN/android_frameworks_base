@@ -2418,6 +2418,14 @@ public final class Settings {
         public static final String POINTER_LOCATION = "pointer_location";
 
         /**
+         * Show icon when stylus is used?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String STYLUS_ICON_ENABLED = "stylus_icon_enabled";
+
+        /**
          * Show touch positions on screen?
          * 0 = no
          * 1 = yes
@@ -2608,6 +2616,13 @@ public final class Settings {
          *
          * @hide
          */
+        public static final String QS_DYNAMIC_USBTETHER = "qs_dyanmic_usbtether";
+
+        /**
+         * Quick Settings Panel Dynamic Tiles
+         *
+         * @hide
+         */
         public static final String QS_DYNAMIC_WIFI = "qs_dyanmic_wifi";
 
         /**
@@ -2616,6 +2631,13 @@ public final class Settings {
          * @hide
          */
         public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
+
+        /**
+         * Quick Settings Collapse Pane
+         *
+         * @hide
+         */
+        public static final String QS_COLLAPSE_PANEL = "qs_collapse_panel";
 
         /**
          * Use the Notification Power Widget? (Who wouldn't!)
@@ -2817,6 +2839,12 @@ public final class Settings {
         public static final String VOLBTN_MUSIC_CONTROLS = "volbtn_music_controls";
 
         /**
+         * Whether or not to launch default music player when headset is connected
+         * @hide
+         */
+        public static final String HEADSET_CONNECT_PLAYER = "headset_connect_player";
+
+        /**
          * Whether national data roaming should be used.
          * @hide
          */
@@ -2888,6 +2916,12 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_LONG_MENU_ACTION = "lockscreen_long_menu_action";
 
+         /**
+          * Always show the battery status on the lockscreen
+          * @hide
+          */
+        public static final String LOCKSCREEN_ALWAYS_SHOW_BATTERY = "lockscreen_always_show_battery";
+
         /**
          * Show the pending notification counts as overlays on the status bar
          * @hide
@@ -2940,7 +2974,7 @@ public final class Settings {
          * Whether power menu silent mode is enabled
          * @hide
          */
-        public static final String POWER_MENU_SILENT_ENABLED = "power_menu_silent_enabled";
+        public static final String POWER_MENU_SOUND_ENABLED = "power_menu_silent_enabled";
 
         /**
          * Whether to unlock the screen with the home key.  The value is boolean (1 or 0).
@@ -2955,6 +2989,7 @@ public final class Settings {
         public static final String LOCKSCREEN_VIBRATE_ENABLED = "lockscreen.vibrate_enabled";
 
         /**
+         * Show the pending notification counts as overlays on the status bar
          * Whether to enable custom rebindings of the actions performed on
          * certain key press events.
          * @hide
@@ -2994,6 +3029,12 @@ public final class Settings {
           * @hide
           */
          public static final String KEY_ASSIST_ACTION = "key_assist_action";
+
+        /**
+         * Weather to minimize lockscreen challenge on screen turned on
+         * @hide
+         */
+        public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
 
          /**
           * Action to perform when the assistant (search) key is long-pressed. (Default is 4)
@@ -3115,9 +3156,10 @@ public final class Settings {
             POWER_MENU_REBOOT_ENABLED,
             POWER_MENU_PROFILES_ENABLED,
             POWER_MENU_AIRPLANE_ENABLED,
-            POWER_MENU_SILENT_ENABLED,
+            POWER_MENU_SOUND_ENABLED,
             POWER_MENU_USER_ENABLED,
             LOCKSCREEN_VIBRATE_ENABLED,
+            LOCKSCREEN_ALWAYS_SHOW_BATTERY,
         };
 
         // Settings moved to Settings.Secure
@@ -4067,6 +4109,14 @@ public final class Settings {
          */
         public static final String LOCK_BEFORE_UNLOCK =
             "lock_before_unlock";
+
+        /**
+         * Determines the width and height of the LockPatternView widget
+         * @hide
+         */
+        public static final String LOCK_PATTERN_SIZE =
+            "lock_pattern_size";
+
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
@@ -4792,6 +4842,36 @@ public final class Settings {
          */
         public static final int INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT =
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
+
+        /**
+         * What happens when the user presses the Home button when the
+         * phone is ringing.<br/>
+         * <b>Values:</b><br/>
+         * 1 - Nothing happens. (Default behavior)<br/>
+         * 2 - The Home button answer the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String RING_HOME_BUTTON_BEHAVIOR = "ring_home_button_behavior";
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR value for "do nothing".
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_DO_NOTHING = 0x1;
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR value for "answer".
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_ANSWER = 0x2;
+
+        /**
+         * RING_HOME_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int RING_HOME_BUTTON_BEHAVIOR_DEFAULT =
+                RING_HOME_BUTTON_BEHAVIOR_DO_NOTHING;
 
         /**
          * The current night mode that has been selected by the user.  Owned

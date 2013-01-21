@@ -209,6 +209,9 @@ public class WifiStateMachine extends StateMachine {
     /* Tracks current frequency mode */
     private AtomicInteger mFrequencyBand = new AtomicInteger(WifiManager.WIFI_FREQUENCY_BAND_AUTO);
 
+    /* Tracks current country code */
+    private String mCountryCode = "GB";
+
     /* Tracks if we are filtering Multicast v4 packets. Default is to filter. */
     private AtomicBoolean mFilteringMulticastV4Packets = new AtomicBoolean(true);
 
@@ -758,6 +761,7 @@ public class WifiStateMachine extends StateMachine {
     public void setWifiEnabled(boolean enable) {
         mLastEnableUid.set(Binder.getCallingUid());
         if (enable) {
+            WifiNative.setMode(0);
             /* Argument is the state that is entered prior to load */
             sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_STATE_ENABLING, 0));
             sendMessage(CMD_START_SUPPLICANT);
@@ -774,6 +778,7 @@ public class WifiStateMachine extends StateMachine {
     public void setWifiApEnabled(WifiConfiguration wifiConfig, boolean enable) {
         mLastApEnableUid.set(Binder.getCallingUid());
         if (enable) {
+            WifiNative.setMode(1);
             /* Argument is the state that is entered prior to load */
             sendMessage(obtainMessage(CMD_LOAD_DRIVER, WIFI_AP_STATE_ENABLING, 0));
             sendMessage(obtainMessage(CMD_START_AP, wifiConfig));
@@ -1079,6 +1084,13 @@ public class WifiStateMachine extends StateMachine {
     }
 
     /**
+     * Returns the operational country code
+     */
+    public String getCountryCode() {
+        return mCountryCode;
+    }
+
+    /**
      * Set the operational frequency band
      * @param band
      * @param persist {@code true} if the setting should be remembered.
@@ -1334,7 +1346,15 @@ public class WifiStateMachine extends StateMachine {
         if (countryCode != null && !countryCode.isEmpty()) {
             setCountryCode(countryCode, false);
         } else {
-            //use driver default
+            // On wifi-only devices, some drivers don't find hidden SSIDs unless DRIVER COUNTRY
+            // is called. Pinging the wifi driver without country code resolves this issue.
+            ConnectivityManager cm =
+                    (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (!cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                setCountryCode(null, false);
+            }
+
+            // In other case, mmc tables from carrier do the trick of starting up the wifi driver
         }
     }
 
@@ -2792,7 +2812,12 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     if (DBG) log("set country code " + country);
-                    if (!mWifiNative.setCountryCode(country.toUpperCase())) {
+                    String countryCode = country != null ? country.toUpperCase() : null;
+                    if (mWifiNative.setCountryCode(countryCode)) {
+                        if (countryCode != null) {
+                            mCountryCode = countryCode;
+                        }
+                    } else {
                         loge("Failed to set country code " + country);
                     }
                     break;

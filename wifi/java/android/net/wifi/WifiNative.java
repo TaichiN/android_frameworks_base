@@ -360,6 +360,10 @@ public class WifiNative {
     }
 
     public boolean setCountryCode(String countryCode) {
+        if (countryCode == null) {
+            // Ping the driver
+            return doBooleanCommand("DRIVER COUNTRY");
+        }
         return doBooleanCommand("DRIVER COUNTRY " + countryCode);
     }
 
@@ -798,4 +802,6 @@ public class WifiNative {
     public boolean p2pServDiscCancelReq(String id) {
         return doBooleanCommand("P2P_SERV_DISC_CANCEL_REQ " + id);
     }
+
+    public native static boolean setMode(int mode);
 }

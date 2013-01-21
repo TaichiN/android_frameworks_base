@@ -27,6 +27,8 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import android.os.SystemProperties;
+
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -241,6 +243,13 @@ public class MediaRecorder
 
         /** @hide H.264/AAC data encapsulated in MPEG2/TS */
         public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+
+        /** @hide QCP file format */
+        public static final int QCP = 9;
+        /** @hide 3GPP2 media file format*/
+        public static final int THREE_GPP2 = 10;
+        /** @hide WAVE media file format*/
+        public static final int WAVE = 11;
     };
 
     /**
@@ -263,6 +272,12 @@ public class MediaRecorder
         public static final int HE_AAC = 4;
         /** Enhanced Low Delay AAC (AAC-ELD) audio codec */
         public static final int AAC_ELD = 5;
+        /** @hide EVRC audio codec */
+        public static final int EVRC = 6;
+        /** @hide QCELP audio codec */
+        public static final int QCELP =7;
+        /** @hide Linear PCM audio codec */
+        public static final int LPCM =8;
     }
 
     /**
@@ -341,6 +356,21 @@ public class MediaRecorder
             setAudioChannels(profile.audioChannels);
             setAudioSamplingRate(profile.audioSampleRate);
             setAudioEncoder(profile.audioCodec);
+        }
+
+        if(SystemProperties.OMAP_ENHANCEMENT) {
+            // Set Encoder Profile  from system properties for H264 Encoder
+            if(profile.videoCodec == MediaRecorder.VideoEncoder.H264){
+                String encProfile;
+                encProfile = SystemProperties.get("video.h264enc.profile");
+                if(encProfile.equals("1") ||encProfile.equals("2") || encProfile.equals("8")) {
+                    Log.v(TAG,"Profile read is : " + encProfile);
+                }else{
+                    Log.v(TAG," Profile is not set or is Invalid .. So setting Baseline as Default");
+                    encProfile = "1";
+                }
+                setParameter(String.format("video-param-encoder-profile="+encProfile));
+            }
         }
     }
 
