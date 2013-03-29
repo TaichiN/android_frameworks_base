@@ -1974,6 +1974,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY,
                     R.integer.def_battery_style);
+
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL,
+                    R.integer.def_brightness_control);
+
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_NOTIF_COUNT,
+                    R.integer.def_notif_count);
         } finally {
             if (stmt != null) stmt.close();
         }
