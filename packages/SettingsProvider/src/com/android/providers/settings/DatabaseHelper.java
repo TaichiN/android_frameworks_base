@@ -1980,6 +1980,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.STATUS_BAR_NOTIF_COUNT,
                     R.integer.def_notif_count);
+
+            loadIntegerSetting(stmt, Settings.System.QS_QUICK_PULLDOWN,
+                    R.integer.def_qs_quick_pulldown);
         } finally {
             if (stmt != null) stmt.close();
         }
