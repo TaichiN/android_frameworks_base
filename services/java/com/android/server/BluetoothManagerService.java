@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.app.AppOpsManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -415,7 +416,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
 
     }
-    public boolean enable() {
+    public boolean enable(String callingPackage) {
         if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
             (!checkIfCallerIsForegroundUser())) {
             Log.w(TAG,"enable(): not allowed for non-active and non system user");
@@ -427,6 +428,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (DBG) {
             Log.d(TAG,"enable():  mBluetooth =" + mBluetooth +
                     " mBinding = " + mBinding);
+        }
+
+        AppOpsManager appOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
+        int callingUid = Binder.getCallingUid();
+        if (appOps.noteOp(AppOpsManager.OP_BLUETOOTH_CHANGE, callingUid, callingPackage) !=
+                AppOpsManager.MODE_ALLOWED) {
+            return false;
         }
 
         synchronized(mReceiver) {
@@ -745,6 +753,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
                 case MESSAGE_SAVE_NAME_AND_ADDRESS: {
                     boolean unbind = false;
+                    boolean waitonofftimeout = false;
                     if (DBG) Log.d(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
                     synchronized(mConnection) {
                         if (!mEnable && mBluetooth != null) {
@@ -800,8 +809,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             mHandler.sendMessage(getMsg);
                         }
                     }
-                    if (!mEnable && mBluetooth != null) waitForOnOff(false, true);
-                    if (unbind) {
+                    if (!mEnable && mBluetooth != null) {
+                        waitonofftimeout = waitForOnOff(false, true);
+                    }
+                    if (unbind && waitonofftimeout) {
                         unbindAndFinish();
                     }
                     break;
@@ -1275,6 +1286,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             if (DBG) Log.d(TAG,"Bluetooth State Change Intent: " + prevState + " -> " + newState);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                     BLUETOOTH_PERM);

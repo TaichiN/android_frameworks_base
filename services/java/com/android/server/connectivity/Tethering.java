@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ThemeUtils;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -43,11 +44,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IState;
@@ -201,10 +202,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
         try {
-            int activeNetType = cm.getActiveNetworkInfo().getType();
-            for (int i : ifaceTypes) {
-                if(i == activeNetType) {
-                    upstreamIfaceTypes.add(new Integer(i));
+            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+            if (networkInfo != null) {
+                int activeNetType = networkInfo.getType();
+                for (int i : ifaceTypes) {
+                    if(i == activeNetType) {
+                        upstreamIfaceTypes.add(new Integer(i));
+                    }
                 }
             }
         } catch (Exception e) {
@@ -665,6 +669,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public void checkDunRequired() {
         int secureSetting = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_DUN_REQUIRED, 2);
+        // Allow override of TETHER_DUN_REQUIRED via prop
+        int prop = SystemProperties.getInt("persist.sys.dun.override", -1);
+        secureSetting = ((prop < 3) && (prop >= 0)) ? prop : secureSetting;
+
         synchronized (mPublicSync) {
             // 2 = not set, 0 = DUN not required, 1 = DUN required
             if (secureSetting != 2) {

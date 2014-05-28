@@ -20,6 +20,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -518,7 +519,7 @@ public final class BluetoothAdapter {
             return true;
         }
         try {
-            return mManagerService.enable();
+            return mManagerService.enable(ActivityThread.currentPackageName());
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -1509,6 +1510,7 @@ public final class BluetoothAdapter {
      * @return true, if the scan was started successfully
      */
     public boolean startLeScan(LeScanCallback callback) {
+        if (getState() != STATE_ON) return false;
         return startLeScan(null, callback);
     }
 
@@ -1570,6 +1572,7 @@ public final class BluetoothAdapter {
      */
     public void stopLeScan(LeScanCallback callback) {
         if (DBG) Log.d(TAG, "stopLeScan()");
+        if (getState() != STATE_ON) return;
         GattCallbackWrapper wrapper;
         synchronized(mLeScanClients) {
             wrapper = mLeScanClients.remove(callback);

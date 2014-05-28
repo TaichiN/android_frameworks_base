@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -77,7 +78,6 @@ import android.view.Surface;
 import android.view.VolumePanel;
 import android.view.WindowManager;
 
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
 
@@ -1449,6 +1449,13 @@ public class AudioService extends IAudioService.Stub {
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
+
+        if ((ringerMode == AudioManager.RINGER_MODE_SILENT) ||
+            (ringerMode == AudioManager.RINGER_MODE_VIBRATE))
+            SystemProperties.set("persist.sys.silent", "1");
+        else
+            SystemProperties.set("persist.sys.silent", "0");
+
         if (ringerMode != getRingerMode()) {
             setRingerModeInt(ringerMode, true);
             // Send sticky broadcast
@@ -2038,10 +2045,19 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
         synchronized (mBluetoothA2dpEnabledLock) {
-            mBluetoothA2dpEnabled = on;
+           int config = AudioSystem.FORCE_NONE;
+           mBluetoothA2dpEnabled = on;
+           config = AudioSystem.getForceUse(AudioSystem.FOR_MEDIA);
+           if((config == AudioSystem.FORCE_BT_A2DP) && (!mBluetoothA2dpEnabled)) {
+               config = AudioSystem.FORCE_NO_BT_A2DP;
+           } else if(mBluetoothA2dpEnabled) {
+               config = AudioSystem.FORCE_NONE;
+           }
+           Log.d(TAG, "BTEnabled "+mBluetoothA2dpEnabled+" config "+config);
+
             sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
                     AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                    config,
                     null, 0);
         }
     }
@@ -2217,12 +2233,8 @@ public class AudioService extends IAudioService.Stub {
                                 }
                                 if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
                                     boolean status;
-                                    if (mScoAudioMode == SCO_MODE_RAW) {
-                                        status = mBluetoothHeadset.connectAudio();
-                                    } else {
-                                        status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
+                                    status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
                                                                             mBluetoothHeadsetDevice);
-                                    }
                                     if (status) {
                                         mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                                     } else {
@@ -2246,12 +2258,8 @@ public class AudioService extends IAudioService.Stub {
                     if (mScoAudioState == SCO_STATE_ACTIVE_INTERNAL) {
                         if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
                             boolean status;
-                            if (mScoAudioMode == SCO_MODE_RAW) {
-                                status = mBluetoothHeadset.disconnectAudio();
-                            } else {
                                 status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
-                            }
                             if (!status) {
                                 mScoAudioState = SCO_STATE_INACTIVE;
                                 broadcastScoConnectionState(
@@ -2427,20 +2435,12 @@ public class AudioService extends IAudioService.Stub {
                             switch (mScoAudioState) {
                             case SCO_STATE_ACTIVATE_REQ:
                                 mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                                if (mScoAudioMode == SCO_MODE_RAW) {
-                                    status = mBluetoothHeadset.connectAudio();
-                                } else {
-                                    status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
+                                status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
-                                }
                                 break;
                             case SCO_STATE_DEACTIVATE_REQ:
-                                if (mScoAudioMode == SCO_MODE_RAW) {
-                                    status = mBluetoothHeadset.disconnectAudio();
-                                } else {
-                                    status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
+                                 status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                                                         mBluetoothHeadsetDevice);
-                                }
                                 break;
                             case SCO_STATE_DEACTIVATE_EXT_REQ:
                                 status = mBluetoothHeadset.stopVoiceRecognition(
@@ -2460,14 +2460,25 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         public void onServiceDisconnected(int profile) {
+            Log.d(TAG, "onServiceDisconnected: Bluetooth profile: " + profile);
             switch(profile) {
             case BluetoothProfile.A2DP:
                 synchronized (mA2dpAvrcpLock) {
                     mA2dp = null;
                     synchronized (mConnectedDevices) {
                         if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
-                            makeA2dpDeviceUnavailableNow(
-                                    mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                            Log.d(TAG, "A2dp service disconnects, pause music player");
+                            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                            BluetoothDevice btDevice = adapter.getRemoteDevice
+                                    (mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                            int delay = checkSendBecomingNoisyIntent(
+                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0);
+                            queueMsgUnderWakeLock(mAudioHandler,
+                                                MSG_SET_A2DP_CONNECTION_STATE,
+                                                BluetoothA2dp.STATE_DISCONNECTED,
+                                                0,
+                                                btDevice,
+                                                delay);
                         }
                     }
                 }
@@ -2521,8 +2532,7 @@ public class AudioService extends IAudioService.Stub {
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
-                boolean safeMediaVolumeEnabled = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_safe_media_volume_enabled);
+                boolean safeMediaVolumeEnabled = safeVolumeEnabled(mContentResolver);
 
                 // The persisted state is either "disabled" or "active": this is the state applied
                 // next time we boot and cannot be "inactive"
@@ -2644,9 +2654,10 @@ public class AudioService extends IAudioService.Stub {
                  (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
                  UserHandle.USER_CURRENT);
 
-        // ringtone and system streams are always affected by ringer mode
+        // ringtone, system and dtmf streams are always affected by ringer mode
         ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
-                                        (1 << AudioSystem.STREAM_SYSTEM);
+                                        (1 << AudioSystem.STREAM_SYSTEM)|
+                                        (1 << AudioSystem.STREAM_DTMF);
 
         if (mVoiceCapable) {
             ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);

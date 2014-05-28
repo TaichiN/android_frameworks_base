@@ -192,13 +192,29 @@ public class ZygoteInit {
     static void closeServerSocket() {
         try {
             if (sServerSocket != null) {
+                FileDescriptor fd = sServerSocket.getFileDescriptor();
                 sServerSocket.close();
+                if (fd != null) {
+                    Libcore.os.close(fd);
+                }
             }
         } catch (IOException ex) {
             Log.e(TAG, "Zygote:  error closing sockets", ex);
+        } catch (libcore.io.ErrnoException ex) {
+            Log.e(TAG, "Zygote:  error closing descriptor", ex);
         }
 
         sServerSocket = null;
+    }
+
+    /**
+     * Return the server socket's underlying file descriptor, so that
+     * ZygoteConnection can pass it to the native code for proper
+     * closure after a child process is forked off.
+     */
+
+    static FileDescriptor getServerSocketFileDescriptor() {
+        return sServerSocket.getFileDescriptor();
     }
 
     private static final int UNPRIVILEGED_UID = 9999;
@@ -370,8 +386,6 @@ public class ZygoteInit {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
-            } else {
-                Log.i(TAG, "Preload resources disabled, skipped.");
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {

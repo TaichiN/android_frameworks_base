@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2013 The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1756,6 +1758,13 @@ public final class Settings {
             "bluetooth_discoverability";
 
         /**
+         * If all file types can be accepted over Bluetooth OBEX.
+         * @hide
+         */
+        public static final String BLUETOOTH_ACCEPT_ALL_FILES =
+            "bluetooth_accept_all_files";
+
+        /**
          * Bluetooth discoverability timeout.  If this value is nonzero, then
          * Bluetooth becomes discoverable for a certain number of seconds,
          * after which is becomes simply connectable.  The value is in seconds.
@@ -2647,6 +2656,12 @@ public final class Settings {
         public static final String LOCKSCREEN_BATTERY_VISIBILITY = "lockscreen_always_show_battery";
 
         /**
+         * Whether to enable the modlock keyguard
+         * @hide
+         */
+        public static final String LOCKSCREEN_MODLOCK_ENABLED = "lockscreen_modlock_enabled";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide
@@ -2763,6 +2778,70 @@ public final class Settings {
          */
         public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
 
+
+        /**
+         * Quick Settings show small icons
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_SMALL_ICONS = "qs_small_icons";
+
+        /**
+         * Enable looking up of phone numbers of nearby places
+         *
+         * @hide
+         */
+        public static final String ENABLE_FORWARD_LOOKUP = "enable_forward_lookup";
+
+        /**
+         * Enable looking up of phone numbers of people
+         *
+         * @hide
+         */
+        public static final String ENABLE_PEOPLE_LOOKUP = "enable_people_lookup";
+
+        /**
+         * Enable looking up of information of phone numbers not in the contacts
+         *
+         * @hide
+         */
+        public static final String ENABLE_REVERSE_LOOKUP = "enable_reverse_lookup";
+
+        /**
+         * The forward lookup provider
+         *
+         * @hide
+         */
+        public static final String FORWARD_LOOKUP_PROVIDER = "forward_lookup_provider";
+
+        /**
+         * The people lookup provider
+         *
+         * @hide
+         */
+        public static final String PEOPLE_LOOKUP_PROVIDER = "people_lookup_provider";
+
+        /**
+         * The reverse lookup provider
+         *
+         * @hide
+         */
+        public static final String REVERSE_LOOKUP_PROVIDER = "reverse_lookup_provider";
+
+        /**
+         * The OpenCNAM paid account ID
+         *
+         * @hide
+         */
+        public static final String DIALER_OPENCNAM_ACCOUNT_SID = "dialer_opencnam_account_sid";
+
+        /**
+         * The OpenCNAM authentication token
+         *
+         * @hide
+         */
+        public static final String DIALER_OPENCNAM_AUTH_TOKEN = "dialer_opencnam_auth_token";
+
         /**
          * Quick Settings Panel Dynamic Tiles
          *
@@ -2783,6 +2862,13 @@ public final class Settings {
          * @hide
          */
         public static final String QS_DYNAMIC_IME = "qs_dyanmic_ime";
+
+        /**
+         * Quick Settings Panel Dynamic Tiles
+         *
+         * @hide
+         */
+        public static final String QS_DYNAMIC_EQUALIZER = "qs_dynamic_equalizer";
 
         /**
          * Quick Settings Panel Dynamic Tiles
@@ -2884,6 +2970,13 @@ public final class Settings {
         public static final String NAV_BUTTONS = "nav_buttons";
 
         /**
+         * Whether navigation bar is placed on the left side in landscape mode
+         *
+         * @hide
+         */
+        public static final String NAVBAR_LEFT_IN_LANDSCAPE = "navigation_bar_left";
+
+        /**
         * Notification Power Widget - Custom Brightness Mode
         * @hide
         */
@@ -2912,6 +3005,12 @@ public final class Settings {
         * @hide
         */
         public static final String EXPANDED_FLASH_MODE = "expanded_flash_mode";
+
+        /**
+        * Developer options - Navigation Bar show switch
+        * @hide
+        */
+        public static final String DEV_FORCE_SHOW_NAVBAR = "dev_force_show_navbar";
 
         /**
         * AutoHide CombinedBar on tablets.
@@ -3084,6 +3183,12 @@ public final class Settings {
         public static final String MVNO_ROAMING = "mvno_roaming";
 
         /**
+         * Whether to enforce quiet hours regardless of the timer.
+         * @hide
+         */
+        public static final String QUIET_HOURS_FORCED = "quiet_hours_forced";
+
+        /**
          * Whether to enable quiet hours.
          * @hide
          */
@@ -3161,12 +3266,6 @@ public final class Settings {
          */
         public static final String QUIET_HOURS_DIM = "quiet_hours_dim";
 
-        /**
-         * Sets the lockscreen background style
-         * @hide
-         */
-        public static final String LOCKSCREEN_BACKGROUND = "lockscreen_background";
-
          /**
          * Action for long-pressing back button on lock screen
          * @hide
@@ -3196,6 +3295,18 @@ public final class Settings {
          * @hide
          */
         public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
+
+        /**
+         * Expanded desktop system bars visibility in locked state
+         * @hide
+         */
+        public static final String EXPANDED_DESKTOP_SYSTEM_BARS_VISIBILITY = "expanded_desktop_system_bars_visibility";
+
+        /**
+         * Use EdgeGesture Service for system gestures in PhoneWindowManager
+         * @hide
+         */
+        public static final String USE_EDGE_SERVICE_FOR_GESTURES = "edge_service_for_gestures";
 
         /**
          * Show the pending notification counts as overlays on the status bar
@@ -3424,13 +3535,6 @@ public final class Settings {
         public static final String LOCKSCREEN_MAXIMIZE_WIDGETS = "lockscreen_maximize_widgets";
 
         /**
-         * Performance profile
-         * @see config_perf_profile_prop in frameworks/base/core/res/res/values/config.xml
-         * @hide
-         */
-        public static final String PERFORMANCE_PROFILE = "performance_profile";
-
-        /**
          * Whether to unlock the screen with the home key.  The value is boolean (1 or 0).
          * @hide
          */
@@ -3443,16 +3547,24 @@ public final class Settings {
         public static final String CAMERA_UNLOCK_SCREEN = "camera_unlock_screen";
 
         /**
-         * Whether the lockscreen vibrate should be enabled.
-         * @hide
-         */
-        public static final String LOCKSCREEN_VIBRATE_ENABLED = "lockscreen.vibrate_enabled";
-
-        /**
          *  Enable statusbar double tap gesture on to put device to sleep
          * @hide
          */
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
+
+        /**
+         * Whether to enable voice wakeup.  The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String VOICE_WAKEUP = "voice_wakeup";
+
+        /**
+         * An intent (a flattened Uri String) to launch when user voice launch
+         * action is detected. An empty or null string will launch the default
+         * voice search activity.
+         * @hide
+         */
+        public static final String VOICE_LAUNCH_INTENT = "voice_launch_intent";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -3476,6 +3588,7 @@ public final class Settings {
             MMS_AUTO_RETRIEVAL_ON_ROAMING,
             BLUETOOTH_DISCOVERABILITY,
             BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+            BLUETOOTH_ACCEPT_ALL_FILES,
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
@@ -3546,8 +3659,8 @@ public final class Settings {
             POWER_MENU_AIRPLANE_ENABLED,
             POWER_MENU_SOUND_ENABLED,
             POWER_MENU_USER_ENABLED,
-            LOCKSCREEN_VIBRATE_ENABLED,
             LOCKSCREEN_BATTERY_VISIBILITY,
+            LOCKSCREEN_MODLOCK_ENABLED,
             PHONE_BLACKLIST_ENABLED,
             PHONE_BLACKLIST_NOTIFY_ENABLED,
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
@@ -5583,6 +5696,44 @@ public final class Settings {
          public static final String PRIVACY_GUARD_DEFAULT = "privacy_guard_default";
 
         /**
+         * Default theme to use.  If empty, use holo.
+         * @hide
+         */
+        public static final String DEFAULT_THEME_PACKAGE = "default_theme_package";
+
+        /**
+         * A '|' delimited list of theme components to apply from the default theme on first boot.
+         * Components can be one or more of the "mods_XXXXXXX" found in
+         * {@link ThemesContract$ThemesColumns}.  Leaving this field blank assumes all components
+         * will be applied.
+         *
+         * ex: mods_icons|mods_overlays|mods_homescreen
+         *
+         * @hide
+         */
+        public static final String DEFAULT_THEME_COMPONENTS = "default_theme_components";
+
+        /**
+         * Whether the default theme was applied on the first boot.
+         * @hide
+         */
+        public static final String DEFAULT_THEME_APPLIED_ON_FIRST_BOOT =
+                "default_theme_applied_on_first_boot";
+
+        /**
+         * Performance profile
+         * @see config_perf_profile_prop in frameworks/base/core/res/res/values/config.xml
+         * @hide
+         */
+        public static final String PERFORMANCE_PROFILE = "performance_profile";
+
+        /**
+         * App-based performance profile selection
+         * @hide
+         */
+        public static final String APP_PERFORMANCE_PROFILES_ENABLED = "app_perf_profiles_enabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -6919,6 +7070,9 @@ public final class Settings {
                 BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX = "bluetooth_a2dp_sink_priority_";
         /** {@hide} */
         public static final String
+                BLUETOOTH_LAST_CONNECTED_A2DP_SEP_TYPE = "bluetooth_last_connected_a2dp_sep_type_";
+        /** {@hide} */
+        public static final String
                 BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX = "bluetooth_input_device_priority_";
         /** {@hide} */
         public static final String
@@ -6938,6 +7092,14 @@ public final class Settings {
          */
         public static final String getBluetoothA2dpSinkPriorityKey(String address) {
             return BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth last connected a2dp profile.
+         * @hide
+         */
+        public static final String getBluetoothLastConnectedA2dpSepTypeKey(String address) {
+            return BLUETOOTH_LAST_CONNECTED_A2DP_SEP_TYPE + address.toUpperCase(Locale.ROOT);
         }
 
         /**
@@ -7144,6 +7306,13 @@ public final class Settings {
          * @hide
          */
         public static final String LOW_BATTERY_SOUND_TIMEOUT = "low_battery_sound_timeout";
+
+        /**
+         * Enable the QuickBoot feature
+         *
+         * @hide
+         */
+        public static final String ENABLE_QUICKBOOT = "enable_quickboot";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -7445,6 +7614,66 @@ public final class Settings {
         public static boolean putFloat(ContentResolver cr, String name, float value) {
             return putString(cr, name, Float.toString(value));
         }
+
+
+        /**
+          * Subscription to be used for voice call on a multi sim device. The supported values
+          * are 0 = SUB1, 1 = SUB2 and etc.
+          * @hide
+          */
+        public static final String MULTI_SIM_VOICE_CALL_SUBSCRIPTION = "multi_sim_voice_call";
+
+        /**
+          * Used to provide option to user to select subscription during dial.
+          * The supported values are 0 = disable or 1 = enable prompt.
+          * @hide
+          */
+        public static final String MULTI_SIM_VOICE_PROMPT = "multi_sim_voice_prompt";
+
+        /**
+          * Subscription to be used for data call on a multi sim device. The supported values
+          * are 0 = SUB1, 1 = SUB2 and etc.
+          * @hide
+          */
+        public static final String MULTI_SIM_DATA_CALL_SUBSCRIPTION = "multi_sim_data_call";
+
+        /**
+          * Subscription to be used for SMS on a multi sim device. The supported values
+          * are 0 = SUB1, 1 = SUB2 and etc.
+          * @hide
+          */
+        public static final String MULTI_SIM_SMS_SUBSCRIPTION = "multi_sim_sms";
+
+       /**
+          * Used to provide option to user to select subscription during send SMS.
+          * The value 1 - enable, 0 - disable
+          * @hide
+          */
+        public static final String MULTI_SIM_SMS_PROMPT = "multi_sim_sms_prompt";
+
+
+
+        /** User preferred subscriptions setting.
+          * This holds the details of the user selected subscription from the card and
+          * the activation status. Each settings string have the coma separated values
+          * iccId,appType,appId,activationStatus,3gppIndex,3gpp2Index
+          * @hide
+         */
+        public static final String[] MULTI_SIM_USER_PREFERRED_SUBS = {"user_preferred_sub1",
+                "user_preferred_sub2","user_preferred_sub3"};
+        /**
+          * Subscription to be used decide priority sub on a multi sim device. The supported values
+          * are 0 = SUB1, 1 = SUB2, 2 = SUB3.
+          * @hide
+          */
+        public static final String MULTI_SIM_PRIORITY_SUBSCRIPTION = "multi_sim_priority";
+
+        /**
+          * To know the status of tune away. The supported values
+          * are false = disable, true = enable.
+          * @hide
+          */
+        public static final String TUNE_AWAY_STATUS = "tune_away";
     }
 
     /**

@@ -58,6 +58,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.MSimTelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -72,6 +73,7 @@ import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
 import com.android.systemui.quicksettings.DockBatteryTile;
+import com.android.systemui.quicksettings.EqualizerTile;
 import com.android.systemui.quicksettings.ExpandedDesktopTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
@@ -94,7 +96,7 @@ import com.android.systemui.quicksettings.TorchTile;
 import com.android.systemui.quicksettings.UsbTetherTile;
 import com.android.systemui.quicksettings.UserTile;
 import com.android.systemui.quicksettings.VolumeTile;
-//import com.android.systemui.quicksettings.WiFiDisplayTile;
+import com.android.systemui.quicksettings.RemoteDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
 import com.android.systemui.quicksettings.WifiAPTile;
 
@@ -213,9 +215,13 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_SETTINGS)) {
                 qs = new PreferencesTile(mContext, this);
             } else if (tile.equals(TILE_WIFI)) {
-                qs = new WiFiTile(mContext, this, mStatusBarService.mNetworkController);
+                if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                    qs = new WiFiTile(mContext, this, mStatusBarService.mMSimNetworkController);
+                } else {
+                    qs = new WiFiTile(mContext, this, mStatusBarService.mNetworkController);
+                }
             } else if (tile.equals(TILE_GPS)) {
-                qs = new GPSTile(mContext, this);
+                qs = new GPSTile(mContext, this, mStatusBarService.mLocationController);
             } else if (tile.equals(TILE_BLUETOOTH) && bluetoothSupported) {
                 qs = new BluetoothTile(mContext, this, mStatusBarService.mBluetoothController);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
@@ -231,15 +237,27 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_SCREENTIMEOUT)) {
                 qs = new ScreenTimeoutTile(mContext, this);
             } else if (tile.equals(TILE_MOBILEDATA) && mobileDataSupported) {
-                qs = new MobileNetworkTile(mContext, this, mStatusBarService.mNetworkController);
+                if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                    qs = new MobileNetworkTile(mContext, this, mStatusBarService.mMSimNetworkController);
+                } else {
+                    qs = new MobileNetworkTile(mContext, this, mStatusBarService.mNetworkController);
+                }
             } else if (tile.equals(TILE_LOCKSCREEN)) {
                 qs = new ToggleLockscreenTile(mContext, this);
             } else if (tile.equals(TILE_NETWORKMODE) && mobileDataSupported) {
-                qs = new MobileNetworkTypeTile(mContext, this, mStatusBarService.mNetworkController);
+                if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                    qs = new MobileNetworkTypeTile(mContext, this, mStatusBarService.mMSimNetworkController);
+                } else {
+                    qs = new MobileNetworkTypeTile(mContext, this, mStatusBarService.mNetworkController);
+                }
             } else if (tile.equals(TILE_AUTOROTATE)) {
                 qs = new AutoRotateTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_AIRPLANE)) {
-                qs = new AirplaneModeTile(mContext, this, mStatusBarService.mNetworkController);
+                if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                    qs = new AirplaneModeTile(mContext, this, mStatusBarService.mMSimNetworkController);
+                } else {
+                    qs = new AirplaneModeTile(mContext, this, mStatusBarService.mNetworkController);
+                }
             } else if (tile.equals(TILE_TORCH)) {
                 qs = new TorchTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_SLEEP)) {
@@ -311,12 +329,12 @@ public class QuickSettingsController {
         if (!dockBatteryLoaded) {
             loadDockBatteryTile(resolver, inflater);
         }
-        /*if (Settings.System.getIntForUser(resolver,
+        if (Settings.System.getIntForUser(resolver,
                     Settings.System.QS_DYNAMIC_WIFI, 1, UserHandle.USER_CURRENT) == 1) {
-            QuickSettingsTile qs = new WiFiDisplayTile(mContext, this);
+            QuickSettingsTile qs = new RemoteDisplayTile(mContext, this);
             qs.setupQuickSettingsTile(inflater, mContainerView);
             mQuickSettingsTiles.add(qs);
-        }*/
+        }
         if (QSUtils.deviceSupportsImeSwitcher(mContext) && Settings.System.getIntForUser(resolver,
                     Settings.System.QS_DYNAMIC_IME, 1, UserHandle.USER_CURRENT) == 1) {
             mIMETile = new InputMethodTile(mContext, this);
@@ -326,6 +344,12 @@ public class QuickSettingsController {
         if (QSUtils.deviceSupportsUsbTether(mContext) && Settings.System.getIntForUser(resolver,
                     Settings.System.QS_DYNAMIC_USBTETHER, 1, UserHandle.USER_CURRENT) == 1) {
             QuickSettingsTile qs = new UsbTetherTile(mContext, this);
+            qs.setupQuickSettingsTile(inflater, mContainerView);
+            mQuickSettingsTiles.add(qs);
+        }
+        if (Settings.System.getIntForUser(resolver,
+                Settings.System.QS_DYNAMIC_EQUALIZER, 1, UserHandle.USER_CURRENT) == 1) {
+            QuickSettingsTile qs = new EqualizerTile(mContext, this);
             qs.setupQuickSettingsTile(inflater, mContainerView);
             mQuickSettingsTiles.add(qs);
         }
@@ -371,9 +395,16 @@ public class QuickSettingsController {
         loadTiles();
         setupBroadcastReceiver();
         setupContentObserver();
-        if (mRibbonMode) {
+        ContentResolver resolver = mContext.getContentResolver();
+        boolean smallIcons = Settings.System.getIntForUser(resolver,
+                Settings.System.QUICK_SETTINGS_SMALL_ICONS, 0, UserHandle.USER_CURRENT) == 1;
+        if (mRibbonMode || smallIcons) {
             for (QuickSettingsTile t : mQuickSettingsTiles) {
-                t.switchToRibbonMode();
+                if (mRibbonMode) {
+                    t.switchToRibbonMode();
+                } else {
+                    t.switchToSmallIcons();
+                }
             }
         }
     }

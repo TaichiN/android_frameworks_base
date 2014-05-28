@@ -45,6 +45,7 @@ import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.NetworkInfo;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.os.Binder;
@@ -77,6 +78,7 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
@@ -367,6 +369,16 @@ public class Vpn extends BaseNetworkStateTracker {
             if (jniSetAddresses(interfaze, builder.toString()) < 1) {
                 throw new IllegalArgumentException("At least one address must be specified");
             }
+
+            if (config.routes != null) {
+                builder = new StringBuilder();
+                for (RouteInfo route : config.routes) {
+                    String[] split = route.toString().split("->");
+                    builder.append(" " + split[0].trim());
+                }
+                jniSetRoutes(interfaze, builder.toString());
+            }
+
             Connection connection = new Connection();
             if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
                         new UserHandle(mUserId))) {
@@ -433,6 +445,18 @@ public class Vpn extends BaseNetworkStateTracker {
         // TODO: ensure that contract class eventually marks as connected
         updateState(DetailedState.AUTHENTICATING, "establish");
         return tun;
+    }
+
+    /**
+     * Check if a given address is covered by the VPN's routing rules.
+     */
+    public boolean isAddressCovered(InetAddress address) {
+        synchronized (Vpn.this) {
+            if (!isRunningLocked()) {
+                return false;
+            }
+            return RouteInfo.selectBestRoute(mConfig.routes, address) != null;
+        }
     }
 
     private boolean isRunningLocked() {
@@ -1096,6 +1120,13 @@ public class Vpn extends BaseNetworkStateTracker {
                 }
 
                 // Set the routes.
+                StringBuilder builder = new StringBuilder();
+                for (RouteInfo route : mConfig.routes) {
+                    String[] split = route.toString().split("->");
+                    builder.append(" " + split[0].trim());
+                }
+                jniSetRoutes(mConfig.interfaze, builder.toString());
+
                 long token = Binder.clearCallingIdentity();
                 try {
                     mCallback.setMarkedForwarding(mConfig.interfaze);
